@@ -106,7 +106,19 @@ geocode(city = "Washington", state = "DC")
 
 
 
+# 
+library(httr)
+test <- GET("https://crossorigin.me/https://api.meetup.com/find/upcoming_events?&sign=true&photo-host=public&lon=-77.03655&page=20&text=science policy&radius=10&lat=38.89489")
+
+test$request
+
+test2 <- GET("https://cfe-meetup-api.herokuapp.com/find/groups?id=18356664")
 
 
+test <- GET("/find/groups?id=18356664")
+p8qnu189h501dvl2vcau3ql4ik
+
+
+################ 
 
 

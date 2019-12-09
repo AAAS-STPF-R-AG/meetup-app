@@ -48,7 +48,7 @@ geocode <- function(loc){
 # Define UI for application that draws a histogram
 ui <- fluidPage(
     # Application title
-    titlePanel("DMV Event Explorer"),
+    titlePanel("AAAS STPF DMV Event Explorer"),
 
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
@@ -64,7 +64,7 @@ ui <- fluidPage(
                       value = "science policy"), 
             numericInput("radius", 
                          "Find events within", 
-                         value = 10, min = 0, max = 100, step = 5, width = 100), 
+                         value = 10, min = 0, max = 100, step = 5), 
             textInput("location", 
                       "miles of", 
                       value = "Washington, DC")
