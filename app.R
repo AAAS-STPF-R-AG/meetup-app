@@ -6,12 +6,18 @@
 #
 #    http://shiny.rstudio.com/
 #
-
+library(tidyverse)
 library(shiny)
 library(leaflet)
 library(jsonlite)
 library(stringi)
 library(rvest)
+if (!require(meetupr)){
+    devtools::install_github("AAAS-STPF-R-AG/meetupr")
+    library(meetupr)
+}
+Sys.setenv(MEETUP_KEY = "xxxxx")
+meetupr:::.onLoad()
 
 geocode <- function(loc){
     if(is.null(loc)){
@@ -72,18 +78,47 @@ ui <- fluidPage(
 
         # Show a plot of the generated distribution
         mainPanel(
-           verbatimTextOutput("plop")
+           leafletOutput("mymap", height = 600)
         )
     )
 )
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-
-    output$plop <- renderPrint({
-        geoloc::wtfismyip()$Your_Location
+    
+    # get events from meetup 
+    
+    mu_events <- reactive({
+        
+        geo_loc <- geocode(input$location)
+        date <- paste0(format(input$date, format = "%Y%m%d"), "T00:00:00")
+        # data frame of search results 
+        res <- find_upcoming(search = input$search, start_date = date, 
+                             long = geo_loc$long, lat = geo_loc$lat, .radius = input$radius)
+        res %>% jsonlite::flatten() %>% 
+            select(name, group.name, local_date, local_time, venue.name, latitude = venue.lat, longitude = venue.lon, 
+                   venue.address_1, venue.city, venue.state, venue.zip, link )
+        
+    })
+    
+    
+    my_map <- leaflet() %>%
+        #addTiles() %>% 
+        addProviderTiles(providers$Wikimedia) %>%
+        setView(-77.03655, 38.89489, zoom = 10)
+    
+    output$mymap <- renderLeaflet({
+        my_map 
+    })
+    
+    observe({
+        leafletProxy("mymap", data = mu_events()) %>% 
+            clearShapes() %>%
+            clearControls() %>% 
+            addMarkers()
     })
 }
+
 
 # Run the application 
 shinyApp(ui = ui, server = server)
