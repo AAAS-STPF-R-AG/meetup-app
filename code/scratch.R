@@ -62,3 +62,51 @@ head(test[,1:6])
 devtools::install_github("paddytobias/eventbriteR")
 
 eventbriteR::eb_query(token = Sys.getenv("EVENTBRITE_API_KEY"))
+
+
+
+# geocoding 
+library(jsonlite)
+library(stringi)
+library(rvest)
+
+geocode <- function(city = NULL, state = NULL, zip = NULL){
+  if(is.null(city) && is.null(state) && is.null(zip)){
+    stop("Error: please provide city and state or zip code")
+  }
+  country = "USA"
+  # NOMINATIM SEARCH API URL
+  src_url <- "https://nominatim.openstreetmap.org/search?q="
+  
+  # CREATE A FULL ADDRESS
+  addr <- paste(city, state, zip, country, sep = "%2C")
+  
+  # CREATE A SEARCH URL BASED ON NOMINATIM API TO RETURN GEOJSON
+  requests <- paste0(src_url, addr, "&format=geojson")
+  
+  # ITERATE OVER THE URLS AND MAKE REQUEST TO THE SEARCH API
+  for (i in 1:length(requests)) {
+    
+    # QUERY THE API TRANSFORM RESPONSE FROM JSON TO R LIST
+    response <- read_html(requests[i]) %>%
+      html_node("p") %>%
+      html_text() %>%
+      fromJSON()
+  }  
+    # FROM THE RESPONSE EXTRACT LATITUDE AND LONGITUDE COORDINATES
+    lon <- response$features$geometry$coordinates[[1]][1]
+    lat <- response$features$geometry$coordinates[[1]][2]
+    
+   return(list(long = lon, lat = lat))
+}
+
+geocode(city = "Washington", state = "DC")
+
+
+
+
+
+
+
+
+
